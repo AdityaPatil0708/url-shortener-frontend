@@ -19,7 +19,7 @@ export default function Signup() {
     ).value;
 
     try {
-      const response = await fetch("http://13.239.16.20:5000/api/signup", {
+      const response = await fetch("https://13.239.16.20.nip.io:5000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

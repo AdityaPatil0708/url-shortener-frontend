@@ -41,7 +41,7 @@ export default function Hero() {
       return;
     }
 
-    const response = await fetch("http://13.239.16.20:5000/api/shortenurl", {
+    const response = await fetch("https://13.239.16.20.nip.io:5000/api/shortenurl", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export default function Hero() {
 const handleAuthAction = async () => {
   if (isLoggedIn) {
     try {
-      await fetch("http://13.239.16.20:5000/api/logout", {
+      await fetch("https://13.239.16.20.nip.io:5000/api/logout", {
         method: "POST",
       });
     } catch (err) {
