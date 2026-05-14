@@ -1,37 +1,42 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  async function handleLogin() {
-    setError("");
-    setLoading(true);
-    
-    const email = (document.getElementById("login-email") as HTMLInputElement).value;
-    const password = (document.getElementById("login-pass") as HTMLInputElement).value;
+async function handleLogin() {
+  setError("");
+  setLoading(true);
 
-    try {
-      const response = await axios.post("http://localhost:3000/api/login", {
-        email: email,
-        password: password,
-      });
+  const email = (document.getElementById("login-email") as HTMLInputElement).value;
+  const password = (document.getElementById("login-pass") as HTMLInputElement).value;
 
-      localStorage.setItem("token", response.data.token);
-      navigate("/");
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || "Login failed");
-      } else {
-        setError("Network error. Please try again.");
-      }
-    } finally {
-      setLoading(false);
+  try {
+    const response = await fetch("http://13.239.16.20:3000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.message || "Login failed");
+      return;
     }
+
+    localStorage.setItem("token", data.token);
+    navigate("/");
+  } catch (err) {
+    setError("Network error. Please try again.");
+  } finally {
+    setLoading(false);
   }
+}
   
   return (
     <div className="min-h-screen flex items-center justify-center px-4">

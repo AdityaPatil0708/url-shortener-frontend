@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+
 
 export default function Hero() {
   const [url, setUrl] = useState("");
@@ -17,57 +17,54 @@ export default function Hero() {
   }, []);
 
   const handleShorten = async () => {
-    setError("");
-    setShortUrl("");
+  setError("");
+  setShortUrl("");
 
-    if (!url.trim()) {
-      setError("Please enter a URL");
-      return;
-    }
+  if (!url.trim()) {
+    setError("Please enter a URL");
+    return;
+  }
 
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      setError("URL must start with http:// or https://");
-      return;
-    }
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    setError("URL must start with http:// or https://");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-      if (!token) {
-        setError("Please login first");
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.post(
-        "http://localhost:3000/api/shortenurl",
-        { url },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        setShortUrl(response.data.shortUrl);
-        setError("");
-      } else {
-        setError(response.data.message || "Failed to shorten URL");
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || "Failed to shorten URL");
-      } else {
-        setError("Network error. Please try again.");
-      }
-      console.error("Error:", err);
-    } finally {
+    if (!token) {
+      setError("Please login first");
       setLoading(false);
+      return;
     }
-  };
+
+    const response = await fetch("http://13.239.16.20/api/shortenurl", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setShortUrl(data.shortUrl);
+      setError("");
+    } else {
+      setError(data.message || "Failed to shorten URL");
+    }
+  } catch (err) {
+    setError("Network error. Please try again.");
+    console.error("Error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleReset = () => {
     setUrl("");
@@ -75,23 +72,25 @@ export default function Hero() {
     setError("");
   };
 
-  const handleAuthAction = async () => {
-    if (isLoggedIn) {
-      try {
-        await axios.post("http://localhost:3000/api/logout");
-      } catch (err) {
-        console.error("Logout error:", err);
-      } finally {
-        localStorage.removeItem("token");
-        setIsLoggedIn(false);
-        setUrl("");
-        setShortUrl("");
-        setError("");
-      }
-    } else {
-      navigate("/login");
+const handleAuthAction = async () => {
+  if (isLoggedIn) {
+    try {
+      await fetch("http://13.239.16.20/api/logout", {
+        method: "POST",
+      });
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      localStorage.removeItem("token");
+      setIsLoggedIn(false);
+      setUrl("");
+      setShortUrl("");
+      setError("");
     }
-  };
+  } else {
+    navigate("/login");
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 md:px-0">

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 export default function Signup() {
   const [error, setError] = useState("");
@@ -11,28 +10,37 @@ export default function Signup() {
     setError("");
     setLoading(true);
 
-    const name = (document.getElementById("signup-name") as HTMLInputElement).value;
-    const email = (document.getElementById("signup-email") as HTMLInputElement).value;
-    const password = (document.getElementById("signup-pass") as HTMLInputElement).value;
+    const name = (document.getElementById("signup-name") as HTMLInputElement)
+      .value;
+    const email = (document.getElementById("signup-email") as HTMLInputElement)
+      .value;
+    const password = (
+      document.getElementById("signup-pass") as HTMLInputElement
+    ).value;
 
     try {
-      await axios.post("http://localhost:3000/api/signup", {
-        name: name,
-        email: email,
-        password: password,
+      const response = await fetch("http://13.239.16.20/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Signup failed");
+        return;
+      }
+
       navigate("/login");
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || "Signup failed");
-      } else {
-        setError("Network error. Please try again.");
-      }
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
   }
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-90 border border-gray-500 rounded-md p-5 pt-8 md:pt-10 pb-8 md:pb-10">
@@ -52,7 +60,7 @@ export default function Signup() {
               placeholder="Enter your name"
             />
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-gray-400 text-sm font-semibold mb-2">
               Email
